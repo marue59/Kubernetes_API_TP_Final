@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-api-deploy
+spec:
+  selector:
+    matchLabels:
+      app: task-api
+  template:
+    metadata:
+      labels:
+        app: task-api
+    spec:
+      volumes:
+          - name: tasks-volume
+            hostPath:
+              path: /tasks
+              type: DirectoryOrCreate
+      containers:
+      - name: task-api
+        volumeMounts:
+            - name: tasks-volume
+              mountPath: /app/tasks
+        env:
+          - name: TASKS_FOLDER
+            valueFrom:
+              configMapKeyRef:
+                name: auth-env
+                key: TASKS_FOLDER
+          - name: AUTH_ADDRESS
+            valueFrom:
+              configMapKeyRef:
+                name: auth-env
+                key: AUTH_ADDRESS
+        image: 0811198720119005/project-tasks
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
